@@ -1,0 +1,43 @@
+📑 1-Bosqich: Tarmoqni Skanerlash (Scanning)
+Maqsadli tizimda qaysi portlar ochiq va ularda qaysi xizmatlar (SSH, HTTP, FTP) ishlayotganini aniqlash.
+
+Buyruq	Vazifasi
+nmap -p- --min-rate 5000 10.10.10.X	Barcha 65535 ta portni juda tezkor skanerlash.
+nmap -sC -sV -p 80,22 10.10.10.X	Topilgan portlardagi dastur versiyalari va standart skriptlarni ishlatish.
+nc -zv 10.10.10.X 80	Muayyan port ochiqligini (Netcat orqali) tezda tekshirish.
+🌐 2-Bosqich: Veb-Xizmatlarni Qidirish (Enumeration)
+Agar maqsadli IP manzilida veb-sayt (80 yoki 443 port) ishlayotgan boʻlsa, undagi yashirin papka va fayllarni topish.
+
+Bash
+# Gobuster yordamida yashirin papkalarni qidirish
+gobuster dir -u http://10.10.10.X -w /usr/share/wordlists/dirb/common.txt
+
+# Dirsearch orqali tezkor va avtomatlashtirilgan qidiruv
+dirsearch -u http://10.10.10.X
+🔍 3-Bosqich: Zaifliklarni Izlash (Vulnerability Research)
+Topilgan dastur nomlari va ularning eski versiyalariga qarshi ma'lum bo'lgan xatoliklar (CVE) borligini tekshirish.
+
+Bash
+# Kali Linux ichidagi Exploit-DB bazasidan qidirish
+searchsploit "Hikvision"
+searchsploit "Apache 2.4"
+
+# Muayyan eksploit faylini joriy papkaga ko'chirib olish
+searchsploit -m 43210.py
+🛠️ 4-Bosqich: Tizim Ma'lumotlarini Tekshirish (Post-Exploitation)
+Laboratoriya sharoitida tizim ichiga kirgandan so'ng, uning arxitekturasi va huquqlarini tekshirish uchun ishlatiladigan asosiy buyruqlar:
+
+📌 Eslatma: Bu buyruqlar maqsadli Linux serverining ichida bajariladi.
+
+whoami — Hozirgi foydalanuvchi nomini koʻrish.
+
+id — Foydalanuvchining guruhlari va UID raqamini tekshirish.
+
+uname -a — Linux yadrosi (Kernel) versiyasini aniqlash.
+
+sudo -l — Foydalanuvchi qaysi buyruqlarni root (administrator) huquqi bilan ishlata olishini koʻrish.
+
+🛡️ Xavfsizlik bo'yicha oltin qoida:
+Ushbu buyruqlar va metodologiya faqatgina CTF (Catch The Flag) o'yinlari, Hack The Box, TryHackMe kabi qonuniy o'quv platformalarida yoki ruxsat berilgan shaxsiy laboratoriyalarda tizim xavfsizligini mustahkamlashni o'rganish uchun xizmat qiladi.
+
+Hozirgi laboratoriya vazifangizda aynan qaysi xizmatni (masalan: veb, SSH yoki ma'lumotlar bazasi) tahlil qilyapsiz?
